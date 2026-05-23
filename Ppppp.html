@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貓蟲家族一番賞</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:#eaf3ff;
+}
+
+/* ===== 標題 ===== */
+.header{
+    background:#4aa3ff;
+    color:black;
+    font-size:32px;
+    font-weight:900;
+    text-align:center;
+    padding:18px;
+    letter-spacing:2px;
+}
+
+/* ===== 功能列 ===== */
+.topBar{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    padding:10px;
+    background:#d9ecff;
+}
+
+.btn{
+    padding:10px 18px;
+    border-radius:14px;
+    border:none;
+    background:white;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn:active{ transform:scale(0.95); }
+
+/* ===== 分頁區 ===== */
+.pageInfo{
+    text-align:center;
+    margin:10px 0;
+}
+
+.title{
+    font-size:24px;
+    font-weight:800;
+}
+
+.notice{
+    font-size:14px;
+    color:#333;
+}
+
+/* ===== 籤紙 ===== */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    padding:10px;
+}
+
+.ticket{
+    height:55px;
+    background:black;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.ticket.used{
+    background:gray;
+    pointer-events:none;
+}
+
+/* ===== 設定視窗 ===== */
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+.box{
+    width:320px;
+    background:white;
+    border-radius:12px;
+    padding:15px;
+}
+
+.box input{
+    width:100%;
+    margin:5px 0;
+    padding:6px;
+}
+
+/* ===== 撕開卡 ===== */
+.scratch{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:320px;
+    height:140px;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+    display:none;
+}
+
+.bottom{
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    font-weight:900;
+}
+
+.top{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#888;
+    transition:1s;
+}
+
+.scratch.open .top{
+    transform:translateX(100%);
+}
+
+/* 確認按鈕 */
+.confirmBtn{
+    margin-top:10px;
+    padding:8px 14px;
+    border-radius:10px;
+    border:none;
+    background:#4aa3ff;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
+
+/* 彩帶 */
+.confetti{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+.piece{
+    position:absolute;
+    width:8px;
+    height:8px;
+    background:red;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">貓蟲家族一番賞</div>
+
+<div class="topBar">
+    <button class="btn" onclick="addPage()">頁數</button>
+    <button class="btn" onclick="reset()">重置</button>
+    <button class="btn" onclick="openSetting()">設定</button>
+</div>
+
+<div class="pageInfo">
+    <div class="title" id="title"></div>
+    <div class="notice" id="notice"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- 設定 -->
+<div class="modal" id="modal">
+<div class="box">
+    <h3>設定</h3>
+    名稱<input id="name"><br>
+    公告<input id="noticeInput"><br>
+    籤紙數<input id="total" type="number"><br>
+
+    <button class="btn" onclick="save()">儲存</button>
+    <button class="btn" onclick="closeModal()">取消</button>
+</div>
+</div>
+
+<!-- 撕開 -->
+<div class="scratch" id="scratch">
+    <div class="bottom" id="scratchText"></div>
+    <div class="top"></div>
+</div>
+
+<script>
+
+/* ===== 資料 ===== */
+let pages=[{
+    name:"預設頁",
+    notice:"歡迎抽獎",
+    total:12,
+    prizes:{"003":"大獎","008":"二獎"},
+    used:{}
+}];
+
+let now=0;
+
+/* ===== 渲染 ===== */
+function render(){
+    let p=pages[now];
+    title.innerText=p.name;
+    notice.innerText=p.notice;
+
+    grid.innerHTML="";
+
+    for(let i=1;i<=p.total;i++){
+        let id=String(i).padStart(3,"0");
+
+        let d=document.createElement("div");
+        d.className="ticket"+(p.used[id]?" used":"");
+        d.innerText=id;
+
+        d.onclick=()=>openTicket(id);
+
+        grid.appendChild(d);
+    }
+}
+
+/* ===== 新頁 ===== */
+function addPage(){
+    pages.push({
+        name:"新頁",
+        notice:"",
+        total:12,
+        prizes:{},
+        used:{}
+    });
+    now=pages.length-1;
+    render();
+}
+
+/* ===== 重置 ===== */
+function reset(){
+    if(confirm("確定重置？")){
+        pages[now].used={};
+        render();
+    }
+}
+
+/* ===== 設定 ===== */
+function openSetting(){
+    let p=pages[now];
+    name.value=p.name;
+    noticeInput.value=p.notice;
+    total.value=p.total;
+    modal.style.display="flex";
+}
+
+function closeModal(){
+    modal.style.display="none";
+}
+
+function save(){
+    if(!confirm("確定儲存？")) return;
+
+    let p=pages[now];
+    let t=parseInt(total.value);
+
+    if(t < Object.keys(p.prizes).length){
+        alert("籤紙數量不足中獎設定");
+        return;
+    }
+
+    p.name=name.value;
+    p.notice=noticeInput.value;
+    p.total=t;
+
+    closeModal();
+    render();
+}
+
+/* ===== 抽籤 ===== */
+function openTicket(id){
+    let p=pages[now];
+
+    let prize=p.prizes[id]||"未中獎";
+
+    scratch.style.display="block";
+    scratchText.innerText=prize;
+    scratch.classList.remove("open");
+
+    setTimeout(()=>scratch.classList.add("open"),100);
+
+    scratch.onclick=()=>{};
+
+    setTimeout(()=>{
+        let btn=document.createElement("button");
+        btn.innerText="確認";
+        btn.className="confirmBtn";
+
+        btn.onclick=()=>{
+            if(prize!=="未中獎"){
+                fire();
+            }
+
+            p.used[id]=true;
+            scratch.style.display="none";
+            render();
+        };
+
+        scratch.appendChild(btn);
+    },1000);
+}
+
+/* ===== 彩帶 ===== */
+function fire(){
+    for(let i=0;i<30;i++){
+        let c=document.createElement("div");
+        c.className="piece";
+        c.style.left=Math.random()*100+"%";
+        c.style.top="0";
+        c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+        document.body.appendChild(c);
+
+        let y=0;
+        let t=setInterval(()=>{
+            y+=5;
+            c.style.top=y+"px";
+            if(y>600){
+                clearInterval(t);
+                c.remove();
+            }
+        },20);
+    }
+}
+
+render();
+</script>
+
+</body>
+</html>
