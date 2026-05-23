@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貓蟲家族 一番賞</title>
+
+<style>
+/* ===== 基礎 ===== */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Microsoft JhengHei",sans-serif;
+}
+
+body{
+background:#ececec;
+overflow:hidden;
+}
+
+/* ===== 上方控制區（獨立） ===== */
+.topBar{
+width:100%;
+height:75px;
+background:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 18px;
+box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo{
+font-size:26px;
+font-weight:bold;
+line-height:1.1;
+}
+
+.topBtns{
+display:flex;
+gap:10px;
+}
+
+.topBtn{
+width:62px;
+height:62px;
+border:none;
+border-radius:16px;
+background:#111;
+color:white;
+font-size:18px;
+cursor:pointer;
+}
+
+/* ===== 主抽籤區（獨立） ===== */
+#main{
+width:100%;
+height:calc(100vh - 75px);
+overflow:auto;
+padding:20px;
+}
+
+#grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:16px;
+}
+
+.card{
+aspect-ratio:1/1;
+background:#111;
+border-radius:8px;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+font-size:40px;
+cursor:pointer;
+}
+
+.used{
+background:#d9d9d9 !important;
+color:#f4f4f4 !important;
+}
+
+/* ===== 彈窗（獨立） ===== */
+#popup{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.45);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+/* ===== 籤紙 ===== */
+#ticketWrap{
+width:92%;
+max-width:700px;
+position:relative;
+}
+
+#ticket{
+width:100%;
+height:260px;
+background:#dff3ff;
+border:3px solid #111;
+border-radius:22px;
+position:relative;
+overflow:hidden;
+}
+
+#ticketBase{
+position:absolute;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:52px;
+font-weight:bold;
+}
+
+#ticketTop{
+position:absolute;
+width:92%;
+height:78%;
+left:4%;
+top:11%;
+background:#2f7ea7;
+border-radius:18px;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+font-size:38px;
+cursor:pointer;
+transition:0.8s;
+transform-origin:left center;
+z-index:5;
+}
+
+.opened{
+transform:rotate(-15deg) translateX(-120%) rotateY(80deg);
+}
+
+/* ===== 設定 / 頁數（保留不動） ===== */
+#pagePanel{
+position:fixed;
+top:85px;
+right:15px;
+width:260px;
+background:white;
+border-radius:18px;
+padding:18px;
+display:none;
+z-index:1000;
+}
+
+#settingPage{
+position:fixed;
+inset:0;
+background:#f3f3f3;
+z-index:2000;
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= 上方功能區 ================= -->
+<div class="topBar">
+
+<div class="logo">
+貓蟲家族<br>一番賞
+</div>
+
+<div class="topBtns">
+<button class="topBtn" id="pageBtn">頁數</button>
+<button class="topBtn" id="resetBtn">重置</button>
+<button class="topBtn" id="settingBtn">設置</button>
+</div>
+
+</div>
+
+<!-- ================= 一番賞主功能 ================= -->
+<div id="main">
+<div id="grid"></div>
+</div>
+
+<!-- ================= 籤紙 ================= -->
+<div id="popup">
+<div id="ticketWrap">
+
+<div id="ticket">
+<div id="ticketBase"></div>
+<div id="ticketTop">點我撕開</div>
+</div>
+
+<button id="confirmBtn">確認</button>
+
+</div>
+</div>
+
+<!-- ================= JS（分區整理） ================= -->
+<script>
+
+/* ================= 系統資料 ================= */
+let pages = JSON.parse(localStorage.getItem("ichibanData")) || [];
+let currentPage = 0;
+let currentNumber = null;
+
+if(pages.length === 0){
+pages.push({
+total:20,
+opened:[],
+rewards:{1:"A賞",4:"B賞",8:"C賞",20:"最後賞"}
+});
+saveData();
+}
+
+/* ================= DOM ================= */
+const grid = document.getElementById("grid");
+const popup = document.getElementById("popup");
+const ticketTop = document.getElementById("ticketTop");
+const ticketBase = document.getElementById("ticketBase");
+
+/* ================= 抽籤區 ================= */
+function renderGrid(){
+
+grid.innerHTML = "";
+
+const data = pages[currentPage];
+
+for(let i=1;i<=data.total;i++){
+
+const card = document.createElement("div");
+card.className = "card";
+
+if(data.opened.includes(i)){
+card.classList.add("used");
+}
+
+card.innerText = String(i).padStart(3,"0");
+card.onclick = ()=>openTicket(i);
+
+grid.appendChild(card);
+}
+
+}
+
+/* ================= 開籤 ================= */
+function openTicket(num){
+
+const data = pages[currentPage];
+
+if(data.opened.includes(num)) return;
+
+currentNumber = num;
+
+popup.style.display = "flex";
+
+ticketTop.classList.remove("opened");
+
+ticketBase.innerText = data.rewards[num] || "銘謝惠顧";
+
+}
+
+/* ================= 撕開 ================= */
+ticketTop.onclick = ()=>{
+
+ticketTop.classList.add("opened");
+
+// 🔥 改字
+ticketTop.innerText = "貓蟲家族一番賞";
+
+const data = pages[currentPage];
+
+if(!data.opened.includes(currentNumber)){
+
+data.opened.push(currentNumber);
+
+saveData();
+
+renderGrid();
+}
+
+};
+
+/* ================= 儲存 ================= */
+function saveData(){
+localStorage.setItem("ichibanData",JSON.stringify(pages));
+}
+
+/* ================= 初始化 ================= */
+renderGrid();
+
+</script>
+
+</body>
+</html>
