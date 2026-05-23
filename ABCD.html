@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>貓蟲家族一番賞</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;
+}
+
+body{
+    background:#eef5ff;
+    overflow-x:hidden;
+}
+
+/* ===== Header ===== */
+
+.header{
+    padding:18px;
+    text-align:center;
+    font-size:34px;
+    font-weight:900;
+    background:var(--headerColor,#53a8ff);
+    color:var(--headerText,#111);
+    letter-spacing:2px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 3px 10px rgba(0,0,0,.12);
+}
+
+/* ===== TopBar ===== */
+
+.topArea{
+    background:#d9ebff;
+    padding:12px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    position:sticky;
+    top:78px;
+    z-index:40;
+}
+
+.btn{
+    border:none;
+    border-radius:18px;
+    padding:12px 18px;
+    background:white;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 3px 10px rgba(0,0,0,.12);
+    transition:.15s;
+}
+
+.btn:active{
+    transform:scale(.95);
+}
+
+.pageArea{
+    padding:18px;
+    text-align:center;
+}
+
+.pageTitle{
+    font-size:30px;
+    font-weight:900;
+    margin-bottom:8px;
+}
+
+.notice{
+    font-size:15px;
+    color:#444;
+    white-space:pre-wrap;
+}
+
+/* ===== Grid ===== */
+
+.grid{
+    padding:16px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.ticket{
+    aspect-ratio:1/1;
+    border-radius:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:.2s;
+    border:3px solid rgba(255,255,255,.35);
+}
+
+.ticket:active{
+    transform:scale(.95);
+}
+
+.ticket.used{
+    background:#8c8c8c !important;
+    color:#fff !important;
+    pointer-events:none;
+    opacity:.7;
+}
+
+/* ===== Modal ===== */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.box{
+    width:92%;
+    max-width:460px;
+    max-height:92vh;
+    overflow:auto;
+    background:white;
+    border-radius:22px;
+    padding:18px;
+}
+
+.box h2{
+    margin-bottom:12px;
+}
+
+.field{
+    margin-bottom:16px;
+}
+
+.field label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:800;
+}
+
+.field input,
+.field textarea,
+.field select{
+    width:100%;
+    padding:10px;
+    border-radius:12px;
+    border:2px solid #d4d4d4;
+    font-size:15px;
+}
+
+textarea{
+    resize:none;
+}
+
+.row{
+    display:flex;
+    gap:10px;
+}
+
+.prizeRow{
+    background:#f3f7ff;
+    border-radius:14px;
+    padding:10px;
+    margin-bottom:10px;
+}
+
+.colorPreview{
+    height:42px;
+    border-radius:12px;
+    border:2px solid #ddd;
+}
+
+/* ===== Scratch ===== */
+
+.scratchWrap{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:2000;
+    flex-direction:column;
+}
+
+.scratchCard{
+    width:90%;
+    max-width:420px;
+    aspect-ratio:7/4;
+    border-radius:24px;
+    overflow:hidden;
+    position:relative;
+    background:#fff;
+    box-shadow:0 10px 35px rgba(0,0,0,.35);
+}
+
+.bottomLayer{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:34px;
+    font-weight:900;
+    z-index:1;
+}
+
+.topLayer{
+    position:absolute;
+    inset:0;
+    z-index:5;
+    touch-action:none;
+    overflow:hidden;
+}
+
+.paper{
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(135deg,#fefefe,#dadada);
+    border-left:1px solid rgba(255,255,255,.9);
+    box-shadow:inset -20px 0 30px rgba(0,0,0,.08);
+    transition:transform .05s;
+    overflow:hidden;
+}
+
+.paper img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.ticketNumber{
+    position:absolute;
+    right:12px;
+    top:10px;
+    font-size:22px;
+    font-weight:900;
+    z-index:20;
+}
+
+.swipeHint{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(255,255,255,.45);
+    padding:8px 14px;
+    border-radius:999px;
+    font-weight:900;
+    font-size:14px;
+    color:#222;
+    animation:swipeMove 2s infinite;
+    backdrop-filter:blur(3px);
+}
+
+@keyframes swipeMove{
+    0%{ transform:translate(0,-50%); opacity:.4; }
+    50%{ transform:translate(60px,-50%); opacity:1; }
+    100%{ transform:translate(0,-50%); opacity:.4; }
+}
+
+.scratchBtns{
+    margin-top:16px;
+    display:flex;
+    gap:12px;
+}
+
+.bigBtn{
+    border:none;
+    border-radius:18px;
+    padding:12px 22px;
+    background:#4ca7ff;
+    color:white;
+    font-weight:900;
+    font-size:16px;
+}
+
+.confetti{
+    position:fixed;
+    width:10px;
+    height:10px;
+    z-index:3000;
+    pointer-events:none;
+}
+
+.pageList{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.pageItem{
+    background:#f4f8ff;
+    border-radius:14px;
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header" id="mainHeader">貓蟲家族一番賞</div>
+
+<div class="topArea">
+    <button class="btn" onclick="openPages()">頁數</button>
+    <button class="btn" onclick="resetPage()">重置</button>
+    <button class="btn" onclick="openSetting()">設定</button>
+</div>
+
+<div class="pageArea">
+    <div class="pageTitle" id="pageTitle"></div>
+    <div class="notice" id="pageNotice"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- ===== 設定 ===== -->
+
+<div class="modal" id="settingModal">
+<div class="box">
+
+<h2>一番賞設定</h2>
+
+<div class="field">
+<label>主標題文字</label>
+<input id="headerText">
+</div>
+
+<div class="field">
+<label>主標題底色</label>
+<input type="color" id="headerColor">
+<div class="colorPreview" id="headerPreview"></div>
+</div>
+
+<div class="field">
+<label>頁面名稱</label>
+<input id="themeName">
+</div>
+
+<div class="field">
+<label>獎品公告欄</label>
+<textarea rows="3" id="noticeInput"></textarea>
+</div>
+
+<div class="field">
+<label>籤紙總數</label>
+<input type="number" id="totalInput">
+</div>
+
+<div class="field">
+<label>籤紙顏色</label>
+<div class="row">
+<input type="color" id="ticketBg">
+<input type="color" id="ticketText">
+</div>
+</div>
+
+<div class="field">
+<label>外層紙張顏色</label>
+<input type="color" id="paperColor">
+</div>
+
+<div class="field">
+<label>底層顏色</label>
+<input type="color" id="bottomColor">
+</div>
+
+<div class="field">
+<label>外層編號顏色</label>
+<input type="color" id="paperNumberColor">
+</div>
+
+<div class="field">
+<label>外層圖片</label>
+<input type="file" id="paperImage" accept="image/*">
+</div>
+
+<div class="field">
+<label>中獎設定</label>
+<div id="prizeArea"></div>
+<button class="btn" onclick="addPrizeRow()">新增獎項</button>
+</div>
+
+<div class="field">
+<label>未中獎文字</label>
+<input id="loseText">
+</div>
+
+<div class="row">
+<button class="btn" onclick="saveSetting()">儲存</button>
+<button class="btn" onclick="closeSetting()">取消</button>
+</div>
+
+</div>
+</div>
+
+<!-- ===== 頁數 ===== -->
+
+<div class="modal" id="pageModal">
+<div class="box">
+
+<h2>頁數管理</h2>
+
+<div class="pageList" id="pageList"></div>
+
+<br>
+
+<div class="row">
+<button class="btn" onclick="addPage()">新增頁數</button>
+<button class="btn" onclick="closePages()">返回</button>
+</div>
+
+</div>
+</div>
+
+<!-- ===== Scratch ===== -->
+
+<div class="scratchWrap" id="scratchWrap">
+
+<div class="scratchCard">
+
+<div class="bottomLayer" id="bottomLayer"></div>
+
+<div class="topLayer" id="topLayer">
+
+<div class="ticketNumber" id="ticketNumber"></div>
+
+<div class="paper" id="paper">
+<div class="swipeHint" id="swipeHint">
+由左往右滑開 ➜
+</div>
+<img id="paperImg" style="display:none;">
+</div>
+
+</div>
+
+</div>
+
+<div class="scratchBtns">
+<button class="bigBtn" id="backBtn">返回</button>
+<button class="bigBtn" id="confirmBtn" style="display:none;">確認</button>
+</div>
+
+</div>
+
+<script>
+
+let pages = JSON.parse(localStorage.getItem("catbugPages")) || [
+{
+    pageName:"第一頁",
+    notice:"歡迎抽獎",
+    total:20,
+    ticketBg:"#000000",
+    ticketText:"#ffffff",
+    paperColor:"#d9d9d9",
+    bottomColor:"#ffffff",
+    paperNumberColor:"#000000",
+    paperImage:"",
+    loseText:"未中獎",
+    prizes:[
+        {number:"001",text:"A賞"},
+        {number:"008",text:"B賞"}
+    ],
+    used:{}
+}
+];
+
+let headerData = JSON.parse(localStorage.getItem("headerData")) || {
+    text:"貓蟲家族一番賞",
+    color:"#53a8ff"
+};
+
+let currentPage = Number(localStorage.getItem("currentPage")) || 0;
+
+function saveAll(){
+    localStorage.setItem("catbugPages",JSON.stringify(pages));
+    localStorage.setItem("headerData",JSON.stringify(headerData));
+    localStorage.setItem("currentPage",currentPage);
+}
+
+function render(){
+
+    let p = pages[currentPage];
+
+    document.documentElement.style.setProperty("--headerColor",headerData.color);
+
+    mainHeader.innerText = headerData.text;
+
+    pageTitle.innerText = p.pageName;
+    pageNotice.innerText = p.notice;
+
+    grid.innerHTML="";
+
+    for(let i=1;i<=p.total;i++){
+
+        let num = String(i).padStart(3,"0");
+
+        let div = document.createElement("div");
+
+        div.className = "ticket";
+
+        if(p.used[num]) div.classList.add("used");
+
+        div.style.background = p.ticketBg;
+        div.style.color = p.ticketText;
+
+        div.innerText = num;
+
+        div.onclick = ()=>openScratch(num);
+
+        grid.appendChild(div);
+    }
+
+    saveAll();
+}
+
+function openSetting(){
+
+    let p = pages[currentPage];
+
+    headerText.value = headerData.text;
+    headerColor.value = headerData.color;
+
+    headerPreview.style.background = headerData.color;
+
+    themeName.value = p.pageName;
+    noticeInput.value = p.notice;
+    totalInput.value = p.total;
+
+    ticketBg.value = p.ticketBg;
+    ticketText.value = p.ticketText;
+    paperColor.value = p.paperColor;
+    bottomColor.value = p.bottomColor;
+    paperNumberColor.value = p.paperNumberColor;
+    loseText.value = p.loseText;
+
+    prizeArea.innerHTML="";
+
+    p.prizes.forEach(x=>{
+        createPrizeRow(x.number,x.text);
+    });
+
+    settingModal.classList.add("show");
+}
+
+function closeSetting(){
+
+    if(confirm("確定取消設定？")){
+        settingModal.classList.remove("show");
+    }
+
+}
+
+function createPrizeRow(number="",text=""){
+
+    let div = document.createElement("div");
+    div.className="prizeRow";
+
+    div.innerHTML=`
+    <input placeholder="編號" value="${number}" class="prizeNumber">
+    <input placeholder="中獎文字" value="${text}" class="prizeText">
+    <button class="btn" onclick="this.parentElement.remove()">刪除</button>
+    `;
+
+    let input = div.querySelector(".prizeNumber");
+
+    input.addEventListener("input",()=>{
+        let v = input.value.replace(/\D/g,"");
+        input.value = v ? String(v).padStart(3,"0") : "";
+    });
+
+    prizeArea.appendChild(div);
+}
+
+function addPrizeRow(){
+    createPrizeRow();
+}
+
+function saveSetting(){
+
+    if(!confirm("確定儲存？")) return;
+
+    let p = pages[currentPage];
+
+    let total = Number(totalInput.value);
+
+    let prizeRows = [...document.querySelectorAll(".prizeRow")];
+
+    let prizes=[];
+
+    prizeRows.forEach(r=>{
+
+        let n = r.querySelector(".prizeNumber").value;
+        let t = r.querySelector(".prizeText").value;
+
+        if(n && t){
+            prizes.push({number:n,text:t});
+        }
+
+    });
+
+    if(prizes.length > total){
+        alert("數量不符無法儲存");
+        return;
+    }
+
+    headerData.text = headerText.value || "貓蟲家族一番賞";
+    headerData.color = headerColor.value;
+
+    p.pageName = themeName.value || "未命名";
+    p.notice = noticeInput.value;
+    p.total = total;
+    p.ticketBg = ticketBg.value;
+    p.ticketText = ticketText.value;
+    p.paperColor = paperColor.value;
+    p.bottomColor = bottomColor.value;
+    p.paperNumberColor = paperNumberColor.value;
+    p.loseText = loseText.value || "未中獎";
+    p.prizes = prizes;
+
+    let file = paperImage.files[0];
+
+    if(file){
+
+        let reader = new FileReader();
+
+        reader.onload = e=>{
+            p.paperImage = e.target.result;
+            finishSave();
+        };
+
+        reader.readAsDataURL(file);
+
+    }else{
+        finishSave();
+    }
+
+}
+
+function finishSave(){
+
+    saveAll();
+
+    settingModal.classList.remove("show");
+
+    render();
+
+}
+
+function openPages(){
+
+    pageList.innerHTML="";
+
+    pages.forEach((p,index)=>{
+
+        let div = document.createElement("div");
+
+        div.className="pageItem";
+
+        div.innerHTML=`
+        <div>${p.pageName}</div>
+        <div class="row">
+            <button class="btn" onclick="switchPage(${index})">切換</button>
+            <button class="btn" onclick="deletePage(${index})">刪除</button>
+        </div>
+        `;
+
+        pageList.appendChild(div);
+
+    });
+
+    pageModal.classList.add("show");
+}
+
+function closePages(){
+    pageModal.classList.remove("show");
+}
+
+function addPage(){
+
+    pages.push({
+        pageName:"新頁面",
+        notice:"",
+        total:20,
+        ticketBg:"#000000",
+        ticketText:"#ffffff",
+        paperColor:"#d9d9d9",
+        bottomColor:"#ffffff",
+        paperNumberColor:"#000000",
+        paperImage:"",
+        loseText:"未中獎",
+        prizes:[],
+        used:{}
+    });
+
+    saveAll();
+
+    openPages();
+}
+
+function switchPage(index){
+
+    currentPage = index;
+
+    closePages();
+
+    render();
+}
+
+function deletePage(index){
+
+    if(pages.length<=1){
+        alert("至少保留一頁");
+        return;
+    }
+
+    if(confirm("確定刪除？")){
+
+        pages.splice(index,1);
+
+        currentPage=0;
+
+        saveAll();
+
+        openPages();
+
+        render();
+    }
+}
+
+function resetPage(){
+
+    if(confirm("確定重置此頁抽獎狀態？")){
+
+        pages[currentPage].used={};
+
+        saveAll();
+
+        render();
+    }
+
+}
+
+/* ===== Scratch ===== */
+
+let startX=0;
+let moveX=0;
+let opened=false;
+let currentNumber="";
+
+function openScratch(number){
+
+    currentNumber = number;
+
+    let p = pages[currentPage];
+
+    let prize = p.prizes.find(x=>x.number===number);
+
+    let text = prize ? prize.text : p.loseText;
+
+    bottomLayer.innerHTML=text;
+
+    bottomLayer.style.background=p.bottomColor;
+
+    ticketNumber.innerText=number;
+    ticketNumber.style.color=p.paperNumberColor;
+
+    paper.style.background=p.paperColor;
+
+    if(p.paperImage){
+        paperImg.src = p.paperImage;
+        paperImg.style.display="block";
+    }else{
+        paperImg.style.display="none";
+    }
+
+    scratchWrap.style.display="flex";
+
+    paper.style.transform="translateX(0px)";
+
+    confirmBtn.style.display="none";
+
+    backBtn.style.display="inline-block";
+
+    opened=false;
+
+    topLayer.onpointerdown=e=>{
+        startX=e.clientX;
+    };
+
+    topLayer.onpointermove=e=>{
+
+        if(opened) return;
+
+        moveX = e.clientX - startX;
+
+        if(moveX<0) moveX=0;
+
+        if(moveX>320) moveX=320;
+
+        paper.style.transform=`translateX(${moveX}px)`;
+
+    };
+
+    topLayer.onpointerup=()=>{
+
+        if(moveX>250){
+
+            opened=true;
+
+            paper.style.transform="translateX(100%)";
+
+            confirmBtn.style.display="inline-block";
+
+            backBtn.style.display="none";
+
+            p.used[number]=true;
+
+            saveAll();
+
+            render();
+
+            if(prize){
+                confetti();
+            }
+
+        }else{
+
+            paper.style.transform="translateX(0px)";
+
+        }
+
+    };
+
+}
+
+backBtn.onclick=()=>{
+
+    if(opened) return;
+
+    scratchWrap.style.display="none";
+}
+
+confirmBtn.onclick=()=>{
+
+    scratchWrap.style.display="none";
+}
+
+function confetti(){
+
+    for(let i=0;i<80;i++){
+
+        let div=document.createElement("div");
+
+        div.className="confetti";
+
+        div.style.left=Math.random()*100+"vw";
+
+        div.style.top="-20px";
+
+        div.style.background=`hsl(${Math.random()*360},100%,50%)`;
+
+        document.body.appendChild(div);
+
+        let y=0;
+
+        let x=(Math.random()*6)-3;
+
+        let timer=setInterval(()=>{
+
+            y+=6;
+
+            div.style.transform=`translate(${x*y/5}px,${y}px) rotate(${y*4}deg)`;
+
+            if(y>window.innerHeight){
+
+                clearInterval(timer);
+
+                div.remove();
+
+            }
+
+        },16);
+
+    }
+
+}
+
+headerColor.oninput=()=>{
+    headerPreview.style.background=headerColor.value;
+}
+
+render();
+
+</script>
+
+</body>
+</html>
