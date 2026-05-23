@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貓蟲家族一番賞</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;
+-webkit-tap-highlight-color:transparent;
+}
+
+body{
+background:#edf5ff;
+overflow-x:hidden;
+}
+
+/* ===== 頂部 ===== */
+
+.header{
+padding:18px;
+text-align:center;
+font-size:34px;
+font-weight:900;
+background:#49a4ff;
+color:#000;
+letter-spacing:2px;
+transition:.3s;
+}
+
+.topArea{
+background:#dbeeff;
+padding:12px;
+display:flex;
+gap:10px;
+justify-content:center;
+position:sticky;
+top:0;
+z-index:10;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+}
+
+.btn{
+border:none;
+padding:12px 18px;
+border-radius:16px;
+font-size:16px;
+font-weight:800;
+background:white;
+box-shadow:0 3px 8px rgba(0,0,0,.15);
+cursor:pointer;
+}
+
+.btn:active{
+transform:scale(.95);
+}
+
+/* ===== 主題 ===== */
+
+.pageWrap{
+padding:14px;
+text-align:center;
+}
+
+.pageTitle{
+font-size:28px;
+font-weight:900;
+margin-bottom:6px;
+}
+
+.notice{
+font-size:15px;
+color:#444;
+margin-bottom:18px;
+white-space:pre-wrap;
+}
+
+/* ===== 籤紙 ===== */
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+padding:0 12px 20px;
+}
+
+.ticket{
+aspect-ratio:1/1;
+border-radius:18px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:20px;
+font-weight:900;
+cursor:pointer;
+transition:.2s;
+user-select:none;
+}
+
+.ticket:active{
+transform:scale(.95);
+}
+
+.used{
+background:#8b8b8b !important;
+color:white !important;
+pointer-events:none;
+}
+
+/* ===== 視窗 ===== */
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:100;
+padding:20px;
+}
+
+.box{
+background:white;
+width:100%;
+max-width:430px;
+max-height:90vh;
+overflow:auto;
+border-radius:24px;
+padding:18px;
+}
+
+.box h2{
+margin-bottom:12px;
+}
+
+.box label{
+display:block;
+margin-top:12px;
+font-weight:800;
+font-size:14px;
+}
+
+.box input,
+.box textarea,
+.box select{
+width:100%;
+padding:10px;
+border-radius:12px;
+border:2px solid #d7d7d7;
+margin-top:5px;
+font-size:15px;
+}
+
+textarea{
+resize:none;
+min-height:70px;
+}
+
+.colorRow{
+display:flex;
+gap:10px;
+align-items:center;
+margin-top:10px;
+}
+
+.colorPreview{
+width:36px;
+height:36px;
+border-radius:10px;
+border:2px solid #ccc;
+}
+
+.prizeRow{
+background:#f5f8ff;
+padding:10px;
+border-radius:14px;
+margin-top:10px;
+}
+
+/* ===== 刮卡 ===== */
+
+.scratchModal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:999;
+padding:20px;
+}
+
+.card{
+width:92%;
+max-width:460px;
+aspect-ratio:7/4;
+position:relative;
+overflow:hidden;
+border-radius:24px;
+box-shadow:0 10px 30px rgba(0,0,0,.35);
+background:white;
+}
+
+.bottomLayer{
+position:absolute;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:32px;
+font-weight:900;
+z-index:1;
+}
+
+.topLayer{
+position:absolute;
+inset:0;
+z-index:2;
+overflow:hidden;
+touch-action:none;
+background:
+linear-gradient(
+135deg,
+#f4f4f4,
+#dfdfdf,
+#f8f8f8
+);
+background-size:cover;
+background-position:center;
+}
+
+.paperTexture{
+position:absolute;
+inset:0;
+background:
+repeating-linear-gradient(
+45deg,
+rgba(255,255,255,.18),
+rgba(255,255,255,.18) 2px,
+rgba(0,0,0,.03) 2px,
+rgba(0,0,0,.03) 4px
+);
+pointer-events:none;
+}
+
+.topNumber{
+position:absolute;
+top:12px;
+right:14px;
+font-size:20px;
+font-weight:900;
+z-index:4;
+}
+
+.slideHint{
+position:absolute;
+top:50%;
+left:18%;
+transform:translateY(-50%);
+padding:8px 14px;
+border-radius:999px;
+background:rgba(255,255,255,.28);
+backdrop-filter:blur(2px);
+font-weight:900;
+font-size:14px;
+color:white;
+z-index:4;
+animation:hintMove 2s linear infinite;
+pointer-events:none;
+}
+
+@keyframes hintMove{
+
+0%{
+transform:
+translateY(-50%)
+translateX(0px);
+opacity:.4;
+}
+
+50%{
+transform:
+translateY(-50%)
+translateX(45px);
+opacity:1;
+}
+
+100%{
+transform:
+translateY(-50%)
+translateX(0px);
+opacity:.4;
+}
+
+}
+
+.scratchBtns{
+margin-top:20px;
+display:flex;
+gap:12px;
+}
+
+.confirmBtn{
+border:none;
+padding:12px 22px;
+border-radius:16px;
+font-size:16px;
+font-weight:900;
+background:#49a4ff;
+color:white;
+}
+
+.backBtn{
+border:none;
+padding:12px 22px;
+border-radius:16px;
+font-size:16px;
+font-weight:900;
+background:#888;
+color:white;
+}
+
+/* ===== 彩帶 ===== */
+
+.confetti{
+position:fixed;
+width:10px;
+height:14px;
+top:-20px;
+animation:fall 3s linear forwards;
+z-index:2000;
+}
+
+@keyframes fall{
+
+0%{
+transform:
+translateY(0)
+rotate(0deg);
+opacity:1;
+}
+
+100%{
+transform:
+translateY(110vh)
+rotate(720deg);
+opacity:0;
+}
+
+}
+
+/* ===== 裁切 ===== */
+
+.cropModal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.8);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:2000;
+padding:20px;
+}
+
+.cropArea{
+width:320px;
+height:180px;
+border-radius:24px;
+overflow:hidden;
+position:relative;
+background:#222;
+}
+
+.cropImg{
+position:absolute;
+top:50%;
+left:50%;
+transform:
+translate(-50%,-50%)
+scale(1);
+transform-origin:center;
+max-width:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header" id="mainHeader">
+貓蟲家族一番賞
+</div>
+
+<div class="topArea">
+
+<button class="btn" onclick="openPages()">
+頁數
+</button>
+
+<button class="btn" onclick="resetPage()">
+重置
+</button>
+
+<button class="btn" onclick="openSetting()">
+設定
+</button>
+
+</div>
+
+<div class="pageWrap">
+
+<div class="pageTitle" id="pageTitle"></div>
+
+<div class="notice" id="pageNotice"></div>
+
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- ===== 設定 ===== -->
+
+<div class="modal" id="settingModal">
+
+<div class="box">
+
+<h2>頁面設定</h2>
+
+<label>主頁標題</label>
+<input id="headerText">
+
+<label>主頁背景顏色</label>
+
+<div class="colorRow">
+<input type="color" id="headerColor">
+<div class="colorPreview" id="headerPreview"></div>
+</div>
+
+<label>頁面名稱</label>
+<input id="pageName">
+
+<label>獎品告示欄</label>
+<textarea id="noticeInput"></textarea>
+
+<label>籤紙總數</label>
+<input type="number" id="totalInput">
+
+<label>頁面籤紙顏色</label>
+
+<div class="colorRow">
+<input type="color" id="ticketColor">
+<div class="colorPreview" id="ticketPreview"></div>
+</div>
+
+<label>頁面編號顏色</label>
+
+<div class="colorRow">
+<input type="color" id="ticketTextColor">
+<div class="colorPreview" id="ticketTextPreview"></div>
+</div>
+
+<label>底層顏色</label>
+
+<div class="colorRow">
+<input type="color" id="bottomColor">
+<div class="colorPreview" id="bottomPreview"></div>
+</div>
+
+<label>外層顏色</label>
+
+<div class="colorRow">
+<input type="color" id="topColor">
+<div class="colorPreview" id="topPreview"></div>
+</div>
+
+<label>外層編號顏色</label>
+
+<div class="colorRow">
+<input type="color" id="topNumberColor">
+<div class="colorPreview" id="topNumberPreview"></div>
+</div>
+
+<label>外層圖片</label>
+<input type="file" id="imgInput" accept="image/*">
+
+<div id="prizeArea"></div>
+
+<button class="btn" onclick="addPrizeRow()">
+新增中獎欄位
+</button>
+
+<div style="display:flex;gap:10px;margin-top:18px">
+
+<button class="btn" onclick="saveSetting()">
+儲存
+</button>
+
+<button class="btn" onclick="closeSetting()">
+取消
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===== 刮卡 ===== -->
+
+<div class="scratchModal" id="scratchModal">
+
+<div class="card">
+
+<div class="bottomLayer" id="bottomLayer">
+未中獎
+</div>
+
+<div class="topLayer" id="topLayer">
+
+<div class="paperTexture"></div>
+
+<div class="topNumber" id="topNumber">
+001
+</div>
+
+<div class="slideHint">
+➡ 由左往右滑開
+</div>
+
+</div>
+
+</div>
+
+<div class="scratchBtns">
+
+<button class="backBtn" id="backBtn">
+返回
+</button>
+
+<button class="confirmBtn"
+id="confirmBtn"
+style="display:none">
+確認
+</button>
+
+</div>
+
+</div>
+
+<!-- ===== 裁切 ===== -->
+
+<div class="cropModal" id="cropModal">
+
+<div class="cropArea" id="cropArea">
+
+<img id="cropImg" class="cropImg">
+
+</div>
+
+<button
+class="confirmBtn"
+style="margin-top:20px"
+onclick="finishCrop()">
+確定
+</button>
+
+</div>
+
+<script>
+
+/* ===== 資料 ===== */
+
+let pages =
+JSON.parse(
+localStorage.getItem("catbugData")
+) || [
+
+{
+
+headerText:"貓蟲家族一番賞",
+headerColor:"#49a4ff",
+
+name:"預設頁",
+notice:"歡迎抽獎",
+
+total:20,
+
+ticketColor:"#000000",
+ticketTextColor:"#ffffff",
+
+bottomColor:"#ffffff",
+
+topColor:"#cccccc",
+
+topTextColor:"#ffffff",
+
+prizes:[
+{
+num:"001",
+text:"A賞"
+}
+],
+
+used:{},
+
+topImage:"",
+cropData:{
+x:0,
+y:0,
+scale:1
+}
+
+}
+
+];
+
+let currentPage = 0;
+let currentTicket = "";
+let scratchOpened = false;
+let scratchDone = false;
+
+/* ===== 儲存 ===== */
+
+function saveMemory(){
+
+localStorage.setItem(
+"catbugData",
+JSON.stringify(pages)
+);
+
+}
+
+/* ===== 顯示 ===== */
+
+function render(){
+
+let p = pages[currentPage];
+
+mainHeader.innerText =
+p.headerText;
+
+mainHeader.style.background =
+p.headerColor;
+
+pageTitle.innerText =
+p.name;
+
+pageNotice.innerText =
+p.notice;
+
+grid.innerHTML = "";
+
+for(let i=1;i<=p.total;i++){
+
+let num =
+String(i).padStart(3,"0");
+
+let div =
+document.createElement("div");
+
+div.className =
+"ticket";
+
+if(p.used[num]){
+
+div.classList.add("used");
+
+}
+
+div.innerText = num;
+
+div.style.background =
+p.ticketColor;
+
+div.style.color =
+p.ticketTextColor;
+
+div.onclick = ()=>{
+
+if(!p.used[num]){
+
+openScratch(num);
+
+}
+
+};
+
+grid.appendChild(div);
+
+}
+
+saveMemory();
+
+}
+
+render();
+
+/* ===== 頁數 ===== */
+
+function openPages(){
+
+let text = "";
+
+pages.forEach((p,i)=>{
+
+text +=
+`${i+1}. ${p.name}\n`;
+
+});
+
+let action = prompt(
+`${text}\n輸入頁數切換\n輸入 add 新增\n輸入 del 刪除目前頁`
+);
+
+if(action==="add"){
+
+pages.push({
+
+headerText:"貓蟲家族一番賞",
+headerColor:"#49a4ff",
+
+name:"新頁面",
+notice:"",
+
+total:20,
+
+ticketColor:"#000000",
+ticketTextColor:"#ffffff",
+
+bottomColor:"#ffffff",
+
+topColor:"#cccccc",
+
+topTextColor:"#ffffff",
+
+prizes:[],
+
+used:{},
+
+topImage:"",
+cropData:{
+x:0,
+y:0,
+scale:1
+}
+
+});
+
+currentPage =
+pages.length-1;
+
+render();
+
+return;
+
+}
+
+if(action==="del"){
+
+if(pages.length===1){
+
+alert("至少保留一頁");
+
+return;
+
+}
+
+if(confirm("確定刪除？")){
+
+pages.splice(currentPage,1);
+
+currentPage=0;
+
+render();
+
+}
+
+return;
+
+}
+
+let n = parseInt(action);
+
+if(n>=1 && n<=pages.length){
+
+currentPage=n-1;
+
+render();
+
+}
+
+}
+
+/* ===== 重置 ===== */
+
+function resetPage(){
+
+if(confirm("是否重置？")){
+
+pages[currentPage].used={};
+
+saveMemory();
+
+render();
+
+}
+
+}
+
+/* ===== 設定 ===== */
+
+function openSetting(){
+
+let p = pages[currentPage];
+
+settingModal.style.display =
+"flex";
+
+headerText.value =
+p.headerText;
+
+headerColor.value =
+p.headerColor;
+
+pageName.value =
+p.name;
+
+noticeInput.value =
+p.notice;
+
+totalInput.value =
+p.total;
+
+ticketColor.value =
+p.ticketColor;
+
+ticketTextColor.value =
+p.ticketTextColor;
+
+bottomColor.value =
+p.bottomColor;
+
+topColor.value =
+p.topColor;
+
+topNumberColor.value =
+p.topTextColor;
+
+updateColorPreview();
+
+prizeArea.innerHTML="";
+
+p.prizes.forEach(v=>{
+
+createPrize(v.num,v.text);
+
+});
+
+}
+
+function closeSetting(){
+
+if(confirm("取消設定？")){
+
+settingModal.style.display =
+"none";
+
+}
+
+}
+
+/* ===== 顏色預覽 ===== */
+
+function updateColorPreview(){
+
+headerPreview.style.background =
+headerColor.value;
+
+ticketPreview.style.background =
+ticketColor.value;
+
+ticketTextPreview.style.background =
+ticketTextColor.value;
+
+bottomPreview.style.background =
+bottomColor.value;
+
+topPreview.style.background =
+topColor.value;
+
+topNumberPreview.style.background =
+topNumberColor.value;
+
+}
+
+document
+.querySelectorAll("input[type=color]")
+.forEach(v=>{
+
+v.oninput=updateColorPreview;
+
+});
+
+/* ===== 中獎欄位 ===== */
+
+function createPrize(num="",text=""){
+
+let div =
+document.createElement("div");
+
+div.className="prizeRow";
+
+div.innerHTML=`
+
+<input
+placeholder="編號"
+value="${num}"
+oninput="
+this.value=
+String(
+this.value.replace(/\\D/g,'')
+).padStart(3,'0').slice(-3)
+">
+
+<input
+placeholder="中獎文字"
+value="${text}"
+>
+
+<button class="btn"
+onclick="this.parentNode.remove()">
+刪除
+</button>
+
+`;
+
+prizeArea.appendChild(div);
+
+}
+
+function addPrizeRow(){
+
+createPrize();
+
+}
+
+/* ===== 儲存 ===== */
+
+function saveSetting(){
+
+if(!confirm("確定儲存？")){
+
+return;
+
+}
+
+let p = pages[currentPage];
+
+p.headerText =
+headerText.value;
+
+p.headerColor =
+headerColor.value;
+
+p.name =
+pageName.value;
+
+p.notice =
+noticeInput.value;
+
+p.total =
+parseInt(totalInput.value);
+
+p.ticketColor =
+ticketColor.value;
+
+p.ticketTextColor =
+ticketTextColor.value;
+
+p.bottomColor =
+bottomColor.value;
+
+p.topColor =
+topColor.value;
+
+p.topTextColor =
+topNumberColor.value;
+
+p.prizes=[];
+
+document
+.querySelectorAll(".prizeRow")
+.forEach(v=>{
+
+let inputs =
+v.querySelectorAll("input");
+
+if(inputs[0].value &&
+inputs[1].value){
+
+p.prizes.push({
+
+num:inputs[0].value,
+text:inputs[1].value
+
+});
+
+}
+
+});
+
+if(
+p.total <
+p.prizes.length
+){
+
+alert("數量不足");
+
+return;
+
+}
+
+settingModal.style.display =
+"none";
+
+saveMemory();
+
+render();
+
+}
+
+/* ===== 開啟刮卡 ===== */
+
+function openScratch(num){
+
+scratchOpened = false;
+scratchDone = false;
+
+currentTicket = num;
+
+let p = pages[currentPage];
+
+let prize =
+p.prizes.find(
+v=>v.num===num
+);
+
+bottomLayer.innerText =
+prize ?
+prize.text :
+"未中獎";
+
+bottomLayer.style.background =
+p.bottomColor;
+
+topLayer.style.backgroundColor =
+p.topColor;
+
+topNumber.style.color =
+p.topTextColor;
+
+topNumber.innerText =
+num;
+
+confirmBtn.style.display =
+"none";
+
+backBtn.style.display =
+"block";
+
+topLayer.style.transform =
+"translateX(0px)";
+
+if(p.topImage){
+
+topLayer.style.backgroundImage =
+`url(${p.topImage})`;
+
+topLayer.style.backgroundSize =
+`${p.cropData.scale*100}%`;
+
+topLayer.style.backgroundPosition =
+`
+calc(50% + ${p.cropData.x}px)
+calc(50% + ${p.cropData.y}px)
+`;
+
+}else{
+
+topLayer.style.backgroundImage =
+"";
+
+}
+
+scratchModal.style.display =
+"flex";
+
+}
+
+/* ===== 返回 ===== */
+
+backBtn.onclick=()=>{
+
+if(scratchOpened){
+
+return;
+
+}
+
+scratchModal.style.display =
+"none";
+
+};
+
+/* ===== 滑動 ===== */
+
+let startX = 0;
+let currentX = 0;
+
+topLayer.addEventListener(
+"touchstart",
+e=>{
+
+startX =
+e.touches[0].clientX;
+
+}
+);
+
+topLayer.addEventListener(
+"touchmove",
+e=>{
+
+currentX =
+e.touches[0].clientX;
+
+let move =
+currentX - startX;
+
+if(move<0){
+move=0;
+}
+
+topLayer.style.transform =
+`translateX(${move}px)`;
+
+if(move>50){
+
+scratchOpened = true;
+
+}
+
+if(move>250){
+
+scratchDone = true;
+
+confirmBtn.style.display =
+"block";
+
+backBtn.style.display =
+"none";
+
+}
+
+}
+);
+
+topLayer.addEventListener(
+"touchend",
+()=>{
+
+if(scratchDone){
+
+let p = pages[currentPage];
+
+let prize =
+p.prizes.find(
+v=>v.num===currentTicket
+);
+
+if(prize){
+
+fireConfetti();
+
+}
+
+return;
+
+}
+
+topLayer.style.transform =
+"translateX(0px)";
+
+scratchOpened = false;
+
+}
+);
+
+/* ===== 確認 ===== */
+
+confirmBtn.onclick=()=>{
+
+pages[currentPage]
+.used[currentTicket] = true;
+
+saveMemory();
+
+scratchModal.style.display =
+"none";
+
+render();
+
+};
+
+/* ===== 彩帶 ===== */
+
+function fireConfetti(){
+
+for(let i=0;i<70;i++){
+
+let div =
+document.createElement("div");
+
+div.className="confetti";
+
+div.style.left =
+Math.random()*100+"vw";
+
+div.style.background =
+`hsl(
+${Math.random()*360},
+100%,
+50%
+)`;
+
+div.style.animationDuration =
+2 + Math.random()*2 + "s";
+
+document.body.appendChild(div);
+
+setTimeout(()=>{
+
+div.remove();
+
+},4000);
+
+}
+
+}
+
+/* ===== 圖片裁切 ===== */
+
+let cropScale=1;
+let cropX=0;
+let cropY=0;
+
+let startDistance=0;
+let startScale=1;
+
+let lastX=0;
+let lastY=0;
+
+function getDistance(a,b){
+
+let x =
+a.clientX-b.clientX;
+
+let y =
+a.clientY-b.clientY;
+
+return Math.sqrt(x*x+y*y);
+
+}
+
+function updateCrop(){
+
+cropImg.style.transform =
+`
+translate(
+calc(-50% + ${cropX}px),
+calc(-50% + ${cropY}px)
+)
+scale(${cropScale})
+`;
+
+}
+
+imgInput.onchange=e=>{
+
+let file=e.target.files[0];
+
+if(!file) return;
+
+let reader=new FileReader();
+
+reader.onload=v=>{
+
+cropImg.src=v.target.result;
+
+cropModal.style.display=
+"flex";
+
+cropScale=1;
+cropX=0;
+cropY=0;
+
+updateCrop();
+
+};
+
+reader.readAsDataURL(file);
+
+};
+
+cropArea.addEventListener(
+"touchstart",
+e=>{
+
+if(e.touches.length===1){
+
+lastX =
+e.touches[0].clientX;
+
+lastY =
+e.touches[0].clientY;
+
+}
+
+if(e.touches.length===2){
+
+startDistance =
+getDistance(
+e.touches[0],
+e.touches[1]
+);
+
+startScale =
+cropScale;
+
+}
+
+},
+{passive:false}
+);
+
+cropArea.addEventListener(
+"touchmove",
+e=>{
+
+e.preventDefault();
+
+if(e.touches.length===1){
+
+let x =
+e.touches[0].clientX;
+
+let y =
+e.touches[0].clientY;
+
+cropX += x-lastX;
+cropY += y-lastY;
+
+lastX=x;
+lastY=y;
+
+updateCrop();
+
+}
+
+if(e.touches.length===2){
+
+let dist =
+getDistance(
+e.touches[0],
+e.touches[1]
+);
+
+cropScale =
+startScale *
+(dist/startDistance);
+
+if(cropScale<0.5)
+cropScale=0.5;
+
+if(cropScale>5)
+cropScale=5;
+
+updateCrop();
+
+}
+
+},
+{passive:false}
+);
+
+function finishCrop(){
+
+pages[currentPage]
+.topImage =
+cropImg.src;
+
+pages[currentPage]
+.cropData = {
+
+x:cropX,
+y:cropY,
+scale:cropScale
+
+};
+
+cropModal.style.display =
+"none";
+
+saveMemory();
+
+}
+
+</script>
+
+</body>
+</html>
