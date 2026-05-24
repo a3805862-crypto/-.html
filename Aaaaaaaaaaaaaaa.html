@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>貓蟲家族一番賞</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    background:#ececec;
+    overflow-x:hidden;
+    color:#222;
+}
+
+/* ===== 上方區域 ===== */
+
+.top-controls{
+    background:#dbeafe;
+    padding:14px;
+    display:flex;
+    gap:12px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    border-bottom:4px solid #c7d2fe;
+}
+
+.ctrl-btn{
+    flex:1;
+    border:none;
+    border-radius:18px;
+    padding:15px;
+    font-size:18px;
+    font-weight:900;
+    background:#2563eb;
+    color:white;
+}
+
+.ctrl-btn:active{
+    transform:scale(.96);
+}
+
+/* ===== 標題 ===== */
+
+.header{
+    padding:18px;
+}
+
+.title-box{
+    background:#3b82f6;
+    color:#000;
+    border-radius:24px;
+    padding:20px;
+}
+
+.title{
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+.notice{
+    margin-top:10px;
+    font-size:16px;
+    white-space:pre-wrap;
+}
+
+/* ===== 數量區 ===== */
+
+.status-box{
+    margin-top:14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.status-card{
+    flex:1;
+    min-width:120px;
+    background:white;
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+    font-weight:900;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.status-title{
+    font-size:14px;
+    color:#666;
+}
+
+.status-value{
+    margin-top:6px;
+    font-size:24px;
+}
+
+/* ===== 中獎剩餘 ===== */
+
+.prize-remain{
+    margin-top:12px;
+    background:white;
+    border-radius:18px;
+    padding:12px;
+}
+
+.prize-remain h3{
+    margin-bottom:10px;
+    font-size:18px;
+}
+
+.prize-item{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid #eee;
+    font-weight:bold;
+}
+
+/* ===== 籤紙 ===== */
+
+.ticket-area{
+    padding:18px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.ticket{
+    aspect-ratio:1/1;
+    border-radius:22px;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-size:22px;
+    font-weight:900;
+    position:relative;
+    overflow:hidden;
+}
+
+.ticket.used{
+    background:#8a8a8a !important;
+    pointer-events:none;
+}
+
+.ticket img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:.9;
+}
+
+.ticket-number{
+    position:relative;
+    z-index:2;
+}
+
+/* ===== 彈窗 ===== */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+    padding:16px;
+}
+
+.modal{
+    background:white;
+    width:100%;
+    max-width:560px;
+    border-radius:24px;
+    padding:18px;
+    max-height:92vh;
+    overflow:auto;
+}
+
+.modal-title{
+    font-size:28px;
+    font-weight:900;
+    margin-bottom:18px;
+}
+
+/* ===== 設定 ===== */
+
+.group{
+    margin-bottom:18px;
+}
+
+.group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+.group input,
+.group textarea{
+    width:100%;
+    border:2px solid #ddd;
+    border-radius:16px;
+    padding:12px;
+    font-size:16px;
+}
+
+textarea{
+    resize:none;
+}
+
+.preview{
+    height:42px;
+    border-radius:12px;
+    border:2px solid #ddd;
+    margin-top:8px;
+}
+
+.prize-row{
+    border:2px solid #eee;
+    border-radius:18px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.row-flex{
+    display:flex;
+    gap:10px;
+}
+
+.row-flex input{
+    flex:1;
+}
+
+.small-btn{
+    border:none;
+    border-radius:14px;
+    padding:12px;
+    font-size:16px;
+    font-weight:900;
+    background:#2563eb;
+    color:white;
+    margin-top:10px;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+.bottom-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+}
+
+.bottom-actions button{
+    flex:1;
+    border:none;
+    border-radius:18px;
+    padding:15px;
+    font-size:18px;
+    font-weight:900;
+}
+
+/* ===== 撕籤 ===== */
+
+.draw-card{
+    width:100%;
+    aspect-ratio:7/4;
+    position:relative;
+    overflow:hidden;
+    border-radius:18px;
+    margin-top:12px;
+}
+
+.back-layer{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:34px;
+    font-weight:900;
+}
+
+.front-layer{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    touch-action:none;
+    border-right:4px solid #ccc;
+}
+
+.paper{
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #efefef 35%,
+        #f8f8f8 60%,
+        #dddddd 100%
+    );
+    opacity:.95;
+}
+
+.front-image{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.front-no{
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:22px;
+    font-weight:900;
+    z-index:5;
+}
+
+.swipe-tip{
+    position:absolute;
+    top:50%;
+    left:10px;
+    transform:translateY(-50%);
+    font-size:20px;
+    font-weight:900;
+    color:rgba(0,0,0,.35);
+    animation:swipe 2s infinite;
+    z-index:5;
+}
+
+@keyframes swipe{
+
+    0%{
+        transform:translateY(-50%) translateX(0);
+    }
+
+    50%{
+        transform:translateY(-50%) translateX(55px);
+    }
+
+    100%{
+        transform:translateY(-50%) translateX(0);
+    }
+
+}
+
+.confirm-btn{
+    width:100%;
+    border:none;
+    border-radius:18px;
+    padding:16px;
+    font-size:22px;
+    font-weight:900;
+    background:#16a34a;
+    color:white;
+    margin-top:16px;
+    display:none;
+}
+
+/* ===== 彩帶 ===== */
+
+.confetti{
+    position:fixed;
+    width:10px;
+    height:24px;
+    top:-30px;
+    animation:fall linear forwards;
+    z-index:9999;
+}
+
+@keyframes fall{
+    to{
+        transform:translateY(120vh) rotate(720deg);
+    }
+}
+
+/* ===== 頁數 ===== */
+
+.page-item{
+    border:none;
+    width:100%;
+    padding:14px;
+    border-radius:16px;
+    background:#2563eb;
+    color:white;
+    font-size:18px;
+    font-weight:900;
+    margin-bottom:10px;
+}
+
+/* ===== 手機 ===== */
+
+@media(max-width:700px){
+
+    .ticket{
+        font-size:18px;
+    }
+
+    .title{
+        font-size:28px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ===== 控制按鈕 ===== -->
+
+<div class="top-controls">
+
+    <button class="ctrl-btn" onclick="openPages()">
+        頁數
+    </button>
+
+    <button class="ctrl-btn" onclick="resetPage()">
+        重置
+    </button>
+
+    <button class="ctrl-btn" onclick="openSettings()">
+        設定
+    </button>
+
+</div>
+
+<!-- ===== 標題 ===== -->
+
+<div class="header">
+
+    <div class="title-box" id="titleBox">
+
+        <div class="title" id="pageTitle">
+            貓蟲家族一番賞
+        </div>
+
+        <div class="notice" id="noticeBox">
+            歡迎抽獎
+        </div>
+
+        <div class="status-box">
+
+            <div class="status-card">
+                <div class="status-title">總數</div>
+                <div class="status-value" id="totalCount">0</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">剩餘數量</div>
+                <div class="status-value" id="remainCount">0</div>
+            </div>
+
+        </div>
+
+        <div class="prize-remain">
+
+            <h3>中獎剩餘數量</h3>
+
+            <div id="prizeRemainList"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===== 籤紙區 ===== -->
+
+<div class="ticket-area" id="ticketArea"></div>
+
+<!-- ===== 設定 ===== -->
+
+<div class="overlay" id="settingOverlay">
+
+    <div class="modal">
+
+        <div class="modal-title">
+            頁面設定
+        </div>
+
+        <div class="group">
+            <label>名稱</label>
+            <input id="setTitle">
+        </div>
+
+        <div class="group">
+            <label>名稱底色</label>
+            <input type="color" id="setHeaderColor">
+            <div class="preview" id="headerPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>名稱文字顏色</label>
+            <input type="color" id="setHeaderTextColor">
+            <div class="preview" id="headerTextPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>公告欄</label>
+            <textarea rows="4" id="setNotice"></textarea>
+        </div>
+
+        <div class="group">
+            <label>籤紙總數</label>
+            <input type="number" min="1" id="setTotal">
+        </div>
+
+        <div class="group">
+            <label>籤紙顏色</label>
+            <input type="color" id="setTicketColor">
+            <div class="preview" id="ticketPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>編號顏色</label>
+            <input type="color" id="setTextColor">
+            <div class="preview" id="textPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>外層顏色</label>
+            <input type="color" id="setFrontColor">
+            <div class="preview" id="frontPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>底層顏色</label>
+            <input type="color" id="setBackColor">
+            <div class="preview" id="backPreview"></div>
+        </div>
+
+        <div class="group">
+            <label>外層圖片</label>
+            <input type="file" accept="image/*" id="setImage">
+        </div>
+
+        <div class="group">
+
+            <label>中獎文字與編號</label>
+
+            <div id="prizeList"></div>
+
+            <button class="small-btn" onclick="addPrizeRow()">
+                新增中獎列
+            </button>
+
+        </div>
+
+        <div class="bottom-actions">
+
+            <button onclick="saveSettings()"
+            style="background:#16a34a;color:white;">
+                儲存
+            </button>
+
+            <button onclick="closeSettings()"
+            style="background:#6b7280;color:white;">
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===== 頁數 ===== -->
+
+<div class="overlay" id="pageOverlay">
+
+    <div class="modal">
+
+        <div class="modal-title">
+            頁數管理
+        </div>
+
+        <div id="pageList"></div>
+
+        <button class="small-btn" onclick="addPage()">
+            新增頁面
+        </button>
+
+        <button class="small-btn delete-btn"
+        onclick="deletePage()">
+            刪除目前頁面
+        </button>
+
+        <div class="bottom-actions">
+
+            <button onclick="closePages()"
+            style="background:#6b7280;color:white;">
+                返回
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===== 抽獎 ===== -->
+
+<div class="overlay" id="drawOverlay">
+
+    <div class="modal">
+
+        <div class="modal-title">
+            撕開籤紙
+        </div>
+
+        <div class="draw-card">
+
+            <div class="back-layer"
+            id="backLayer">
+            </div>
+
+            <div class="front-layer"
+            id="frontLayer">
+
+                <div class="paper"></div>
+
+                <img class="front-image"
+                id="frontImage">
+
+                <div class="front-no"
+                id="frontNo">
+                </div>
+
+                <div class="swipe-tip">
+                    ➜ 由左往右滑開
+                </div>
+
+            </div>
+
+        </div>
+
+        <button class="small-btn"
+        id="returnBtn"
+        onclick="closeDraw()">
+            返回
+        </button>
+
+        <button class="confirm-btn"
+        id="confirmBtn"
+        onclick="confirmTicket()">
+            確認
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ===== 資料 ===== */
+
+let pages = JSON.parse(
+    localStorage.getItem("catBugLottery")
+) || [];
+
+if(pages.length===0){
+
+    pages.push(createDefaultPage());
+
+}
+
+let currentPage =
+parseInt(localStorage.getItem("currentPage")) || 0;
+
+let currentTicket = null;
+
+function createDefaultPage(){
+
+    return{
+
+        title:"貓蟲家族一番賞",
+        notice:"歡迎抽獎",
+
+        total:20,
+
+        ticketColor:"#000000",
+        textColor:"#ffffff",
+
+        headerColor:"#3b82f6",
+        headerTextColor:"#000000",
+
+        frontColor:"#f5f5f5",
+        backColor:"#fff7cc",
+
+        frontImage:"",
+
+        used:[],
+
+        prizes:[
+
+            {
+                number:"001",
+                text:"A賞"
+            },
+
+            {
+                number:"005",
+                text:"B賞"
+            }
+
+        ]
+
+    };
+
+}
+
+/* ===== 儲存 ===== */
+
+function saveData(){
+
+    localStorage.setItem(
+        "catBugLottery",
+        JSON.stringify(pages)
+    );
+
+    localStorage.setItem(
+        "currentPage",
+        currentPage
+    );
+
+}
+
+/* ===== 三位數 ===== */
+
+function formatNum(n){
+
+    return String(n).padStart(3,"0");
+
+}
+
+/* ===== 目前頁 ===== */
+
+function page(){
+
+    return pages[currentPage];
+
+}
+
+/* ===== 渲染 ===== */
+
+function render(){
+
+    const p = page();
+
+    pageTitle.innerText = p.title;
+
+    noticeBox.innerText = p.notice;
+
+    titleBox.style.background =
+    p.headerColor;
+
+    pageTitle.style.color =
+    p.headerTextColor;
+
+    totalCount.innerText =
+    p.total;
+
+    remainCount.innerText =
+    p.total - p.used.length;
+
+    /* ===== 中獎剩餘 ===== */
+
+    const remainMap = {};
+
+    p.prizes.forEach(pr=>{
+
+        if(!remainMap[pr.text]){
+
+            remainMap[pr.text]=0;
+
+        }
+
+        if(!p.used.includes(pr.number)){
+
+            remainMap[pr.text]++;
+
+        }
+
+    });
+
+    prizeRemainList.innerHTML="";
+
+    for(let key in remainMap){
+
+        prizeRemainList.innerHTML += `
+        <div class="prize-item">
+            <span>${key}</span>
+            <span>${remainMap[key]}個</span>
+        </div>
+        `;
+
+    }
+
+    /* ===== 籤紙 ===== */
+
+    ticketArea.innerHTML="";
+
+    for(let i=1;i<=p.total;i++){
+
+        const num = formatNum(i);
+
+        const div = document.createElement("div");
+
+        div.className="ticket";
+
+        if(p.used.includes(num)){
+
+            div.classList.add("used");
+
+        }
+
+        div.style.background =
+        p.ticketColor;
+
+        div.style.color =
+        p.textColor;
+
+        if(p.frontImage){
+
+            const img =
+            document.createElement("img");
+
+            img.src = p.frontImage;
+
+            div.appendChild(img);
+
+        }
+
+        div.innerHTML += `
+        <div class="ticket-number">
+            ${num}
+        </div>
+        `;
+
+        div.onclick=()=>openDraw(num);
+
+        ticketArea.appendChild(div);
+
+    }
+
+    saveData();
+
+}
+
+/* ===== 設定 ===== */
+
+function openSettings(){
+
+    const p = page();
+
+    settingOverlay.style.display="flex";
+
+    setTitle.value = p.title;
+
+    setNotice.value = p.notice;
+
+    setTotal.value = p.total;
+
+    setTicketColor.value =
+    p.ticketColor;
+
+    setTextColor.value =
+    p.textColor;
+
+    setHeaderColor.value =
+    p.headerColor;
+
+    setHeaderTextColor.value =
+    p.headerTextColor;
+
+    setFrontColor.value =
+    p.frontColor;
+
+    setBackColor.value =
+    p.backColor;
+
+    updatePreview();
+
+    renderPrizeRows();
+
+}
+
+function closeSettings(){
+
+    settingOverlay.style.display="none";
+
+}
+
+/* ===== 預覽 ===== */
+
+function updatePreview(){
+
+    headerPreview.style.background =
+    setHeaderColor.value;
+
+    headerTextPreview.style.background =
+    setHeaderTextColor.value;
+
+    ticketPreview.style.background =
+    setTicketColor.value;
+
+    textPreview.style.background =
+    setTextColor.value;
+
+    frontPreview.style.background =
+    setFrontColor.value;
+
+    backPreview.style.background =
+    setBackColor.value;
+
+}
+
+[
+setHeaderColor,
+setHeaderTextColor,
+setTicketColor,
+setTextColor,
+setFrontColor,
+setBackColor
+].forEach(el=>{
+
+    el.addEventListener(
+        "input",
+        updatePreview
+    );
+
+});
+
+/* ===== 中獎設定 ===== */
+
+function renderPrizeRows(){
+
+    prizeList.innerHTML="";
+
+    page().prizes.forEach((pr,index)=>{
+
+        const div =
+        document.createElement("div");
+
+        div.className="prize-row";
+
+        div.innerHTML=`
+
+        <div class="row-flex">
+
+            <input
+            value="${pr.number}"
+            onchange="
+            updatePrizeNo(
+            ${index},
+            this.value
+            )">
+
+            <input
+            value="${pr.text}"
+            onchange="
+            updatePrizeText(
+            ${index},
+            this.value
+            )">
+
+        </div>
+
+        <button class="small-btn delete-btn"
+        onclick="removePrize(${index})">
+            刪除
+        </button>
+
+        `;
+
+        prizeList.appendChild(div);
+
+    });
+
+}
+
+function updatePrizeNo(index,val){
+
+    page().prizes[index].number =
+    formatNum(parseInt(val||1));
+
+}
+
+function updatePrizeText(index,val){
+
+    page().prizes[index].text =
+    val;
+
+}
+
+function addPrizeRow(){
+
+    page().prizes.push({
+
+        number:"001",
+        text:"新獎項"
+
+    });
+
+    renderPrizeRows();
+
+}
+
+function removePrize(index){
+
+    if(page().prizes.length<=1){
+
+        alert("至少保留一列");
+
+        return;
+
+    }
+
+    page().prizes.splice(index,1);
+
+    renderPrizeRows();
+
+}
+
+/* ===== 儲存 ===== */
+
+function saveSettings(){
+
+    if(!confirm("是否儲存設定？")){
+
+        return;
+
+    }
+
+    const p = page();
+
+    const total =
+    parseInt(setTotal.value);
+
+    if(total < p.prizes.length){
+
+        alert("數量不符無法儲存");
+
+        return;
+
+    }
+
+    p.title = setTitle.value;
+
+    p.notice = setNotice.value;
+
+    p.total = total;
+
+    p.ticketColor =
+    setTicketColor.value;
+
+    p.textColor =
+    setTextColor.value;
+
+    p.headerColor =
+    setHeaderColor.value;
+
+    p.headerTextColor =
+    setHeaderTextColor.value;
+
+    p.frontColor =
+    setFrontColor.value;
+
+    p.backColor =
+    setBackColor.value;
+
+    const file =
+    setImage.files[0];
+
+    if(file){
+
+        const reader =
+        new FileReader();
+
+        reader.onload=function(e){
+
+            p.frontImage =
+            e.target.result;
+
+            finishSave();
+
+        };
+
+        reader.readAsDataURL(file);
+
+    }else{
+
+        finishSave();
+
+    }
+
+}
+
+function finishSave(){
+
+    saveData();
+
+    render();
+
+    closeSettings();
+
+}
+
+/* ===== 頁數 ===== */
+
+function openPages(){
+
+    pageOverlay.style.display="flex";
+
+    pageList.innerHTML="";
+
+    pages.forEach((p,index)=>{
+
+        pageList.innerHTML += `
+        <button class="page-item"
+        onclick="switchPage(${index})">
+            ${index+1}. ${p.title}
+        </button>
+        `;
+
+    });
+
+}
+
+function closePages(){
+
+    pageOverlay.style.display="none";
+
+}
+
+function switchPage(index){
+
+    currentPage=index;
+
+    render();
+
+    closePages();
+
+}
+
+function addPage(){
+
+    pages.push(createDefaultPage());
+
+    render();
+
+    openPages();
+
+}
+
+function deletePage(){
+
+    if(pages.length<=1){
+
+        alert("至少保留一頁");
+
+        return;
+
+    }
+
+    if(!confirm("是否刪除目前頁面？")){
+
+        return;
+
+    }
+
+    pages.splice(currentPage,1);
+
+    currentPage=0;
+
+    render();
+
+    openPages();
+
+}
+
+/* ===== 重置 ===== */
+
+function resetPage(){
+
+    if(!confirm("是否重置此頁？")){
+
+        return;
+
+    }
+
+    pages[currentPage] =
+    createDefaultPage();
+
+    render();
+
+}
+
+/* ===== 找獎 ===== */
+
+function getPrize(number){
+
+    const pr =
+    page().prizes.find(
+        p=>p.number===number
+    );
+
+    return pr ?
+    pr.text :
+    "銘謝惠顧";
+
+}
+
+/* ===== 開啟 ===== */
+
+let dragging=false;
+let startX=0;
+let moved=0;
+let opened=false;
+
+function openDraw(number){
+
+    currentTicket=number;
+
+    const p = page();
+
+    drawOverlay.style.display="flex";
+
+    backLayer.innerText =
+    getPrize(number);
+
+    backLayer.style.background =
+    p.backColor;
+
+    frontLayer.style.background =
+    p.frontColor;
+
+    frontNo.innerText =
+    number;
+
+    frontNo.style.color =
+    p.textColor;
+
+    frontImage.src =
+    p.frontImage || "";
+
+    frontLayer.style.transform =
+    "translateX(0px)";
+
+    confirmBtn.style.display="none";
+
+    returnBtn.style.display="block";
+
+    opened=false;
+
+    /* ===== 滑動 ===== */
+
+    frontLayer.onpointerdown=e=>{
+
+        dragging=true;
+
+        startX=e.clientX;
+
+    };
+
+    frontLayer.onpointermove=e=>{
+
+        if(!dragging)return;
+
+        moved =
+        e.clientX-startX;
+
+        if(moved<0)moved=0;
+
+        frontLayer.style.transform =
+        `translateX(${moved}px)`;
+
+        if(moved>260 && !opened){
+
+            opened=true;
+
+            finishOpen();
+
+        }
+
+    };
+
+    frontLayer.onpointerup=()=>{
+
+        dragging=false;
+
+    };
+
+}
+
+/* ===== 撕開 ===== */
+
+functi
