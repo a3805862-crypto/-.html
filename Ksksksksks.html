@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>一番賞系統</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Microsoft JhengHei";
+}
+
+body{
+  background:#f2f2f2;
+}
+
+/* ===== 上方區 ===== */
+#topBar{
+  background:#bfe3ff;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.topBtn{
+  width:90px;
+  height:40px;
+  background:#fff;
+  border:1px solid #000;
+  border-radius:0;
+  cursor:pointer;
+}
+
+/* ===== 標題 ===== */
+#title{
+  text-align:center;
+  font-size:26px;
+  margin:10px;
+}
+
+#notice{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+/* ===== 統計區 ===== */
+#stats{
+  background:#fff;
+  margin:10px;
+  padding:10px;
+  font-size:14px;
+  border:1px solid #ccc;
+  white-space:pre-line;
+}
+
+/* ===== 籤紙 ===== */
+#grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:5px;
+  padding:10px;
+}
+
+.ticket{
+  aspect-ratio:1/1;
+  background:black;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:0;
+}
+
+.ticket.used{
+  background:white;
+  color:black;
+  pointer-events:none;
+}
+
+/* ===== 彈窗 ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.box{
+  background:#fff;
+  padding:15px;
+  width:320px;
+  text-align:center;
+}
+
+button{margin:5px;}
+input,select{width:90%;margin:5px;}
+</style>
+</head>
+
+<body>
+
+<!-- 上方按鈕 -->
+<div id="topBar">
+  <button class="topBtn" onclick="openAuth('page')">頁數</button>
+  <button class="topBtn" onclick="openAuth('reset')">重置</button>
+  <button class="topBtn" onclick="openAuth('setting')">設定</button>
+</div>
+
+<div id="title"></div>
+<div id="notice"></div>
+<div id="stats"></div>
+<div id="grid"></div>
+
+<!-- 密碼 -->
+<div class="modal" id="authModal">
+  <div class="box">
+    <div>輸入密碼</div>
+    <input type="password" id="authInput">
+    <button onclick="authCheck()">確認</button>
+    <button onclick="closeAuth()">返回</button>
+  </div>
+</div>
+
+<!-- 設定 -->
+<div class="modal" id="settingModal">
+  <div class="box">
+    <h3>設定</h3>
+
+    <input id="setTitle" placeholder="主題名稱">
+    <input id="setNotice" placeholder="公告欄">
+    <input id="setTotal" type="number" placeholder="籤紙總數">
+    <input id="setLimit" type="number" placeholder="可抽數量">
+
+    <textarea id="setPrizes" placeholder="獎品格式 A:1,B:2"></textarea>
+
+    <button onclick="saveSetting()">儲存設定</button>
+    <button onclick="closeSetting()">返回</button>
+  </div>
+</div>
+
+<!-- 抽獎視窗 -->
+<div class="modal" id="drawModal">
+  <div class="box">
+    <div id="drawText"></div>
+    <button onclick="closeDraw()">確認</button>
+  </div>
+</div>
+
+<script>
+
+const PWD = "a3806379";
+
+let state = load();
+
+function save(){
+  localStorage.setItem("raffle", JSON.stringify(state));
+}
+
+function load(){
+  return JSON.parse(localStorage.getItem("raffle")) || {
+    title:"未設定主題",
+    notice:"",
+    total:50,
+    limit:10,
+    used:[],
+    prizes:{}
+  };
+}
+
+/* ===== 初始化 ===== */
+render();
+
+/* ===== UI ===== */
+function render(){
+  document.getElementById("title").innerText = state.title;
+  document.getElementById("notice").innerText = state.notice;
+
+  renderStats();
+  renderGrid();
+  save();
+}
+
+function renderGrid(){
+  let g = document.getElementById("grid");
+  g.innerHTML="";
+
+  for(let i=1;i<=state.total;i++){
+    let id = String(i).padStart(3,"0");
+
+    let div = document.createElement("div");
+    div.className="ticket";
+
+    if(state.used.includes(id)){
+      div.classList.add("used");
+    }
+
+    div.innerText=id;
+
+    div.onclick=()=>{
+      if(state.used.includes(id)) return;
+      draw(id);
+    };
+
+    g.appendChild(div);
+  }
+}
+
+/* ===== 統計 ===== */
+function renderStats(){
+  let usedCount = state.used.length;
+  let remain = state.total - usedCount;
+
+  let text = `總數：${state.total}
+剩餘：${remain}
+可抽：${state.limit - usedCount}`;
+
+  let prizeText = "\n";
+
+  for(let k in state.prizes){
+    let obj = state.prizes[k];
+    let used = obj.used || 0;
+    prizeText += `${k} 數量：${obj.count} / 剩餘：${obj.count-used}\n`;
+  }
+
+  document.getElementById("stats").innerText = text + prizeText;
+}
+
+/* ===== 抽獎 ===== */
+function draw(id){
+
+  if(state.used.length >= state.limit){
+    alert("已達可抽數量");
+    return;
+  }
+
+  let prize = state.prizes[id] || "未中獎";
+
+  state.used.push(id);
+  save();
+  render();
+
+  document.getElementById("drawText").innerText =
+    `編號 ${id}\n結果：${prize}`;
+
+  document.getElementById("drawModal").style.display="flex";
+}
+
+/* ===== 密碼流程 ===== */
+let action="";
+
+function openAuth(a){
+  action=a;
+  document.getElementById("authModal").style.display="flex";
+}
+
+function closeAuth(){
+  document.getElementById("authModal").style.display="none";
+}
+
+function authCheck(){
+  let v = document.getElementById("authInput").value;
+
+  if(v !== PWD){
+    alert("密碼錯誤");
+    return;
+  }
+
+  closeAuth();
+
+  if(action==="reset"){
+    resetAll();
+  }
+
+  if(action==="setting"){
+    openSetting();
+  }
+}
+
+/* ===== 重置 ===== */
+function resetAll(){
+  state.used=[];
+  save();
+  render();
+}
+
+/* ===== 設定 ===== */
+function openSetting(){
+  document.getElementById("setTitle").value=state.title;
+  document.getElementById("setNotice").value=state.notice;
+  document.getElementById("setTotal").value=state.total;
+  document.getElementById("setLimit").value=state.limit;
+  document.getElementById("setPrizes").value=
+    Object.entries(state.prizes).map(e=>`${e[0]}:${e[1].count}`).join(",");
+
+  document.getElementById("settingModal").style.display="flex";
+}
+
+function closeSetting(){
+  document.getElementById("settingModal").style.display="none";
+}
+
+function saveSetting(){
+
+  let total = parseInt(document.getElementById("setTotal").value);
+
+  let prizeStr = document.getElementById("setPrizes").value;
+
+  let prizes={};
+
+  prizeStr.split(",").forEach(p=>{
+    let [k,v]=p.split(":");
+    if(k){
+      prizes[k.trim()]={count:parseInt(v)||1,used:0};
+    }
+  });
+
+  state.title=document.getElementById("setTitle").value;
+  state.notice=document.getElementById("setNotice").value;
+
+  if(Object.keys(prizes).length > total){
+    alert("數量不符無法儲存");
+    return;
+  }
+
+  state.total=total;
+  state.limit=parseInt(document.getElementById("setLimit").value);
+  state.prizes=prizes;
+
+  save();
+  closeSetting();
+  render();
+}
+
+/* ===== 抽獎視窗 ===== */
+function closeDraw(){
+  document.getElementById("drawModal").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
